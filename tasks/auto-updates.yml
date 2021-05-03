@@ -5,12 +5,14 @@
       - unattended-upgrades
     state: present
     update_cache: true
+    
 - name: copy config file
   ansible.builtin.copy:
-    src: files//50unattended-upgrades
-    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    src: files/{{ item.src }}
+    dest: /etc/apt/apt.conf.d/{{ item.dest }}
     owner: root
     group: root
+    mode: 0644
   with_items:
-    - { src: files/50unattended-upgrades, dest: /etc/apt/apt.conf.d/50unattended-upgrades }
-    - { src: files/20auto-upgrades, dest: /etc/apt/apt.conf.d/20auto-upgrades }
+    - { src: 50unattended-upgrades, dest: 50unattended-upgrades }
+    - { src: 20auto-upgrades, dest: 20auto-upgrades }
