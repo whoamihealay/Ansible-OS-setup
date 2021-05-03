@@ -1,0 +1,16 @@
+---
+- name: auto-update enable
+  apt:
+    name: 
+      - unattended-upgrades
+    state: present
+    update_cache: true
+- name: copy config file
+  ansible.builtin.copy:
+    src: files//50unattended-upgrades
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+  with_items:
+    - { src: files/50unattended-upgrades, dest: /etc/apt/apt.conf.d/50unattended-upgrades }
+    - { src: files/20auto-upgrades, dest: /etc/apt/apt.conf.d/20auto-upgrades }

@@ -1,0 +1,6 @@
+#Vagrant files
+Vagrantfile
+.vagrant/
+
+#Inventory
+inventory
