@@ -1,31 +1,39 @@
 ---
 - hosts: all
-  become: yes
+  become: true
+
+  handlers:
+    - name: Restart cron
+      ansible.builtin.systemd:
+        name: cron
+        state: restarted
+
 
   pre_tasks:
     - name: apt
       apt:
-        update_cache: yes
-        upgrade: 'yes' 
+        update_cache: true
+        upgrade: 'yes'
         cache_valid_time: 600
 
-  tasks:   
+  tasks:
 
     - import_tasks: tasks/auto-updates.yml
-    
-# Timezone   
+
+    # Timezone
     - name: Set Timezone.
       timezone:
         name: Europe/Paris
       register: timezone
 
-    - name: Restart Cron
-      ansible.builtin.systemd:
-        name: cron
-        state: restarted
-      when: timezone is changed
-    
-# Firewall config
+    - name: install NTP.
+      apt:
+        name: ntp
+        state: present
+      notify:
+        - Restart cron
+
+    # Firewall config
     - name: disable firewall.
       community.general.ufw:
         state: disabled
@@ -37,7 +45,7 @@
       community.general.ufw:
         default: deny
         direction: incoming
-        log: yes
+        log: true
     - name: Allow incoming from home network.
       community.general.ufw:
         rule: allow
@@ -55,11 +63,11 @@
       community.general.ufw:
         state: enabled
 
-# install fail2ban
+    # install fail2ban
 
     - name: install fail2ban
       apt:
-        name: 
+        name:
           - fail2ban
         state: present
         update_cache: true
@@ -68,20 +76,14 @@
         src: files/fail2ban.local
         dest: /etc/fail2ban/fail2ban.local
         owner: root
-        group: root 
+        group: root
     - name: copy jail
       ansible.builtin.copy:
         src: files/jail.local
         dest: /etc/fail2ban/jail.local
         owner: root
-        group: root 
+        group: root
     - name: bounce fail2ban
       ansible.builtin.systemd:
         name: fail2ban
         state: restarted
-
-
-
-
-
-  
