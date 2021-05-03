@@ -4,3 +4,9 @@ Vagrantfile
 
 #Inventory
 inventory
+
+#Molecule
+molecule/
+
+#Yamllint
+.yamllint
