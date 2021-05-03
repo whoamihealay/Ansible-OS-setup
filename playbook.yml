@@ -1,0 +1,89 @@
+---
+- hosts: '*'
+  become: yes
+  tasks:
+    
+# Update/Upgrade    
+    - name: apt
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
+    
+# Auto-updates   
+    - name: auto-update enable
+      apt:
+        name: 
+          - unattended-upgrades
+        state: present
+        update_cache: true
+    - name: copy config file
+      ansible.builtin.copy:
+        src: ~/Documents/ansible/templates/50unattended-upgrades
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        owner: root
+        group: root    
+    
+# Timezone   
+    - name: timedatectl
+      ansible.builtin.command: timedatectl set-timezone Europe/Paris
+    
+# Firewall config
+    - name: disable firewall.
+      community.general.ufw:
+        state: disabled
+    - name: allow outgoing.
+      community.general.ufw:
+        default: allow
+        direction: outgoing
+    - name: deny incoming
+      community.general.ufw:
+        default: deny
+        direction: incoming
+        log: yes
+    - name: Allow incoming from home network.
+      community.general.ufw:
+        rule: allow
+        src: '{{ item }}'
+      loop:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+    - name: allow k3s Api.
+      community.general.ufw:
+        rule: allow
+        port: '6443'
+        proto: tcp
+    - name: enable firewall
+      community.general.ufw:
+        state: enabled
+
+# install fail2ban
+
+    - name: install fail2ban
+      apt:
+        name: 
+          - fail2ban
+        state: present
+        update_cache: true
+    - name: copy conf
+      ansible.builtin.copy:
+        src: ~/Documents/ansible/templates/fail2ban.local
+        dest: /etc/fail2ban/fail2ban.local
+        owner: root
+        group: root 
+    - name: copy jail
+      ansible.builtin.copy:
+        src: ~/Documents/ansible/templates/jail.local
+        dest: /etc/fail2ban/jail.local
+        owner: root
+        group: root 
+    - name: bounce fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: restarted
+
+
+
+
+
+  
