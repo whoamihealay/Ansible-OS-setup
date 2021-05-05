@@ -1,0 +1,6 @@
+---
+roles:
+    
+collections:
+  - name: community.general
+    version: 3.0.0

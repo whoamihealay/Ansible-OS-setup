@@ -10,3 +10,6 @@ molecule/
 
 #Yamllint
 .yamllint
+
+#Collections (ansible-galaxy install -r requirements.yml)
+collections/
